@@ -90,10 +90,10 @@
     textBoxControls.mtr = objectControls.mtr;
     textBoxControls.tr = objectControls.tr;
     textBoxControls.br = objectControls.br;
-    textBoxControls.tl = objectControls.tl;
-    textBoxControls.bl = objectControls.bl;
-    textBoxControls.mt = objectControls.mt;
-    textBoxControls.mb = objectControls.mb;
+    // textBoxControls.tl = objectControls.tl;
+    // textBoxControls.bl = objectControls.bl;
+    // textBoxControls.mt = objectControls.mt;
+    // textBoxControls.mb = objectControls.mb;
 
     textBoxControls.mr = new fabric.Control({
       x: 0.5,
@@ -109,6 +109,54 @@
       actionHandler: controlsUtils.changeWidth,
       cursorStyleHandler: scaleSkewStyleHandler,
       actionName: 'resizing',
+    });
+
+    textBoxControls.mt = new fabric.Control({
+      x: 0,
+      y: -0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.mb = new fabric.Control({
+      x: 0,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.tr = new fabric.Control({
+      x: 0.5,
+      y: -0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.br = new fabric.Control({
+      x: 0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.tl = new fabric.Control({
+      x: -0.5,
+      y: -0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.bl = new fabric.Control({
+      x: -0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
     });
   }
 })();

@@ -62,7 +62,7 @@
      * @type Object
      * @private
      */
-    _dimensionAffectingProps: fabric.Text.prototype._dimensionAffectingProps.concat('width'),
+    _dimensionAffectingProps: fabric.Text.prototype._dimensionAffectingProps.concat('width', 'height'),
 
     /**
      * Use this regular expression to split strings in breakable lines
@@ -104,7 +104,7 @@
         this.enlargeSpaces();
       }
       // clear cache and re-calculate height
-      this.height = this.calcTextHeight();
+      this.height = Math.max(this.calcTextHeight(), this.height);
       this.saveState({ propertySet: '_dimensionAffectingProps' });
     },
 

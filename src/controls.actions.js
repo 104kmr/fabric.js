@@ -693,6 +693,26 @@
     return oldWidth !== newWidth;
   }
 
+  function resizeObject(eventData, transform, x, y) {
+    var target = transform.target, localPoint = getLocalPoint(transform, transform.originX, transform.originY, x, y),
+        strokePadding = target.strokeWidth / (target.strokeUniform ? target.scaleX : 1),
+        multiplier = isTransformCentered(transform) ? 2 : 1,
+        oldWidth = target.width,
+        newWidth = Math.abs(localPoint.x * multiplier / target.scaleX) - strokePadding,
+        oldHeight = target.height,
+        newHeight = Math.abs(localPoint.y * multiplier / target.scaleY) - strokePadding,
+        isChange = false;
+    if (oldHeight !== newHeight) {
+      target.set('height', Math.max(newHeight, 0));
+      isChange = true;
+    }
+    if (oldWidth !== newWidth) {
+      target.set('width', Math.max(newWidth, 0));
+      isChange = true;
+    }
+    return isChange
+  }
+
   /**
    * Action handler
    * @private
@@ -726,6 +746,7 @@
   controls.scalingYOrSkewingX = scalingYOrSkewingX;
   controls.scalingXOrSkewingY = scalingXOrSkewingY;
   controls.changeWidth = wrapWithFireEvent('resizing', wrapWithFixedAnchor(changeWidth));
+  controls.resizeObject = wrapWithFireEvent('resizing', wrapWithFixedAnchor(resizeObject));
   controls.skewHandlerX = skewHandlerX;
   controls.skewHandlerY = skewHandlerY;
   controls.dragHandler = dragHandler;
