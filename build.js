@@ -232,6 +232,7 @@ var filesToInclude = [
   ifSpecifiedInclude('itext', 'src/mixins/itext.svg_export.js'),
 
   ifSpecifiedInclude('textbox', 'src/shapes/textbox.class.js'),
+  ifSpecifiedInclude('textbox_vertical', 'src/shapes/textbox_vertical.class.js'),
   ifSpecifiedInclude('interaction', 'src/mixins/default_controls.js'),
 
   //  extends fabric.StaticCanvas, fabric.Canvas, fabric.Object, depends on fabric.PencilBrush and fabric.Rect
@@ -255,6 +256,9 @@ else {
         console.log(err);
         throw err;
       }
+      exec('cp fabric.js ../../../frontend/node_modules/fabric/dist', function (error, output) {
+        console.log(error, output)
+      })
       if (buildFast) {
         process.exit(0);
       }

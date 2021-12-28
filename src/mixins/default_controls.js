@@ -90,10 +90,6 @@
     textBoxControls.mtr = objectControls.mtr;
     textBoxControls.tr = objectControls.tr;
     textBoxControls.br = objectControls.br;
-    // textBoxControls.tl = objectControls.tl;
-    // textBoxControls.bl = objectControls.bl;
-    // textBoxControls.mt = objectControls.mt;
-    // textBoxControls.mb = objectControls.mb;
 
     textBoxControls.mr = new fabric.Control({
       x: 0.5,
@@ -114,7 +110,7 @@
     textBoxControls.mt = new fabric.Control({
       x: 0,
       y: -0.5,
-      actionHandler: controlsUtils.resizeObject,
+      actionHandler: controlsUtils.changeHeight,
       cursorStyleHandler: scaleSkewStyleHandler,
       actionName: 'resizing',
     });
@@ -122,7 +118,84 @@
     textBoxControls.mb = new fabric.Control({
       x: 0,
       y: 0.5,
+      actionHandler: controlsUtils.changeHeight,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.tr = new fabric.Control({
+      x: 0.5,
+      y: -0.5,
       actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.br = new fabric.Control({
+      x: 0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.tl = new fabric.Control({
+      x: -0.5,
+      y: -0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.bl = new fabric.Control({
+      x: -0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+  }
+
+  if (fabric.TextBoxVertical) {
+    // this is breaking the prototype inheritance, no time / ideas to fix it.
+    // is important to document that if you want to have all objects to have a
+    // specific custom control, you have to add it to Object prototype and to Textbox
+    // prototype. The controls are shared as references. So changes to control `tr`
+    // can still apply to all objects if needed.
+    var textBoxControls = fabric.TextBoxVertical.prototype.controls = { };
+
+    textBoxControls.mtr = objectControls.mtr;
+    textBoxControls.tr = objectControls.tr;
+    textBoxControls.br = objectControls.br;
+
+    textBoxControls.mr = new fabric.Control({
+      x: 0.5,
+      y: 0,
+      actionHandler: controlsUtils.changeWidth,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.ml = new fabric.Control({
+      x: -0.5,
+      y: 0,
+      actionHandler: controlsUtils.changeWidth,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.mt = new fabric.Control({
+      x: 0,
+      y: -0.5,
+      actionHandler: controlsUtils.changeHeight,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.mb = new fabric.Control({
+      x: 0,
+      y: 0.5,
+      actionHandler: controlsUtils.changeHeight,
       cursorStyleHandler: scaleSkewStyleHandler,
       actionName: 'resizing',
     });
