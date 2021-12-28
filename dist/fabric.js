@@ -7281,6 +7281,16 @@ fabric.ElementsParser = function(elements, callback, options, reviver, parsingOp
     return oldWidth !== newWidth;
   }
 
+  function changeHeight(eventData, transform, x, y) {
+    var target = transform.target, localPoint = getLocalPoint(transform, transform.originX, transform.originY, x, y),
+        strokePadding = target.strokeWidth / (target.strokeUniform ? target.scaleX : 1),
+        multiplier = isTransformCentered(transform) ? 2 : 1,
+        oldHeight = target.height,
+        newHeight = Math.abs(localPoint.y * multiplier / target.scaleY) - strokePadding;
+    target.set('height', Math.max(newHeight, 0));
+    return oldHeight !== newHeight;
+  }
+
   function resizeObject(eventData, transform, x, y) {
     var target = transform.target, localPoint = getLocalPoint(transform, transform.originX, transform.originY, x, y),
         strokePadding = target.strokeWidth / (target.strokeUniform ? target.scaleX : 1),
@@ -7334,6 +7344,7 @@ fabric.ElementsParser = function(elements, callback, options, reviver, parsingOp
   controls.scalingYOrSkewingX = scalingYOrSkewingX;
   controls.scalingXOrSkewingY = scalingXOrSkewingY;
   controls.changeWidth = wrapWithFireEvent('resizing', wrapWithFixedAnchor(changeWidth));
+  controls.changeHeight = wrapWithFireEvent('resizing', wrapWithFixedAnchor(changeHeight));
   controls.resizeObject = wrapWithFireEvent('resizing', wrapWithFixedAnchor(resizeObject));
   controls.skewHandlerX = skewHandlerX;
   controls.skewHandlerY = skewHandlerY;
@@ -30929,6 +30940,96 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 })(typeof exports !== 'undefined' ? exports : this);
 
 
+(function(global) {
+
+  'use strict';
+
+  var extend = fabric.util.object.extend;
+
+  if (!global.fabric) {
+    global.fabric = { };
+  }
+
+  if (global.fabric.TextBoxVertical) {
+    fabric.warn('fabric.TextBoxVertical is already defined.');
+    return;
+  }
+
+  /**
+   * Image class
+   * @class fabric.Image
+   * @extends fabric.Object
+   * @tutorial {@link http://fabricjs.com/fabric-intro-part-1#images}
+   * @see {@link fabric.Image#initialize} for constructor definition
+   */
+  fabric.TextBoxVertical = fabric.util.createClass(fabric.Image, /** @lends fabric.TextBoxVertical.prototype */ {
+
+    _renderFill: function(ctx) {
+      var elementToDraw = this._element;
+      if (!elementToDraw) {
+        return;
+      }
+      var scaleX = this._filterScalingX,
+          scaleY = this._filterScalingY,
+          w = this.width,
+          h = this.height,
+          min = Math.min,
+          max = Math.max,
+          // crop values cannot be lesser than 0.
+          cropX = max(this.cropX, 0),
+          cropY = max(this.cropY, 0),
+          elWidth = elementToDraw.naturalWidth || elementToDraw.width,
+          elHeight = elementToDraw.naturalHeight || elementToDraw.height,
+          sX = cropX * scaleX,
+          sY = cropY * scaleY,
+          // the width height cannot exceed element width/height, starting from the crop offset.
+          sW = min(w * scaleX, elWidth - sX),
+          sH = min(h * scaleY, elHeight - sY),
+          x = w / 2 - elWidth, // Changed
+          y = -h / 2,
+          maxDestW = min(w, elWidth / scaleX - cropX),
+          maxDestH = min(h, elHeight / scaleY - cropY);
+
+      elementToDraw && ctx.drawImage(elementToDraw, sX, sY, sW, sH, x, y, maxDestW, maxDestH);
+    },
+
+    // 高さ、幅を要素より小さくしない
+    render: function(ctx) {
+      if (this.isNotVisible()) {
+        return;
+      }
+      if (this.canvas && this.canvas.skipOffscreen && !this.group && !this.isOnScreen()) {
+        return;
+      }
+      var elementToDraw = this._element;
+      if (!elementToDraw) {
+        return;
+      }
+      var elWidth = elementToDraw.naturalWidth || elementToDraw.width,
+          elHeight = elementToDraw.naturalHeight || elementToDraw.height;
+      this.height = Math.max(elHeight, this.height);
+      this.width = Math.max(elWidth, this.width);
+      this.callSuper('render', ctx);
+    }
+  });
+
+
+  /**
+   * Creates an instance of fabric.Image from an URL string
+   * @static
+   * @param {String} url URL to create an image from
+   * @param {Function} [callback] Callback to invoke when image is created (newly created image is passed as a first argument). Second argument is a boolean indicating if an error occurred or not.
+   * @param {Object} [imgOptions] Options object
+   */
+   fabric.TextBoxVertical.fromURL = function(url, callback, imgOptions) {
+    fabric.util.loadImage(url, function(img, isError) {
+      callback && callback(new fabric.TextBoxVertical(img, imgOptions), isError);
+    }, null, imgOptions && imgOptions.crossOrigin);
+  };
+
+})(typeof exports !== 'undefined' ? exports : this);
+
+
 (function() {
 
   var controlsUtils = fabric.controlsUtils,
@@ -31021,10 +31122,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     textBoxControls.mtr = objectControls.mtr;
     textBoxControls.tr = objectControls.tr;
     textBoxControls.br = objectControls.br;
-    // textBoxControls.tl = objectControls.tl;
-    // textBoxControls.bl = objectControls.bl;
-    // textBoxControls.mt = objectControls.mt;
-    // textBoxControls.mb = objectControls.mb;
 
     textBoxControls.mr = new fabric.Control({
       x: 0.5,
@@ -31045,7 +31142,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     textBoxControls.mt = new fabric.Control({
       x: 0,
       y: -0.5,
-      actionHandler: controlsUtils.resizeObject,
+      actionHandler: controlsUtils.changeHeight,
       cursorStyleHandler: scaleSkewStyleHandler,
       actionName: 'resizing',
     });
@@ -31053,7 +31150,84 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     textBoxControls.mb = new fabric.Control({
       x: 0,
       y: 0.5,
+      actionHandler: controlsUtils.changeHeight,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.tr = new fabric.Control({
+      x: 0.5,
+      y: -0.5,
       actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.br = new fabric.Control({
+      x: 0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.tl = new fabric.Control({
+      x: -0.5,
+      y: -0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+
+    textBoxControls.bl = new fabric.Control({
+      x: -0.5,
+      y: 0.5,
+      actionHandler: controlsUtils.resizeObject,
+      cursorStyleHandler: scaleStyleHandler,
+      actionName: 'resizing'
+    });
+  }
+
+  if (fabric.TextBoxVertical) {
+    // this is breaking the prototype inheritance, no time / ideas to fix it.
+    // is important to document that if you want to have all objects to have a
+    // specific custom control, you have to add it to Object prototype and to Textbox
+    // prototype. The controls are shared as references. So changes to control `tr`
+    // can still apply to all objects if needed.
+    var textBoxControls = fabric.TextBoxVertical.prototype.controls = { };
+
+    textBoxControls.mtr = objectControls.mtr;
+    textBoxControls.tr = objectControls.tr;
+    textBoxControls.br = objectControls.br;
+
+    textBoxControls.mr = new fabric.Control({
+      x: 0.5,
+      y: 0,
+      actionHandler: controlsUtils.changeWidth,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.ml = new fabric.Control({
+      x: -0.5,
+      y: 0,
+      actionHandler: controlsUtils.changeWidth,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.mt = new fabric.Control({
+      x: 0,
+      y: -0.5,
+      actionHandler: controlsUtils.changeHeight,
+      cursorStyleHandler: scaleSkewStyleHandler,
+      actionName: 'resizing',
+    });
+
+    textBoxControls.mb = new fabric.Control({
+      x: 0,
+      y: 0.5,
+      actionHandler: controlsUtils.changeHeight,
       cursorStyleHandler: scaleSkewStyleHandler,
       actionName: 'resizing',
     });
