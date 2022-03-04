@@ -30985,6 +30985,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
           // the width height cannot exceed element width/height, starting from the crop offset.
           sW = min(w * scaleX, elWidth - sX),
           sH = min(h * scaleY, elHeight - sY),
+          // x = -w / 2,
           x = w / 2 - elWidth, // Changed
           y = -h / 2,
           maxDestW = min(w, elWidth / scaleX - cropX),
