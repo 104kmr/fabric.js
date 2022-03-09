@@ -27333,7 +27333,33 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
      */
     complexity: function() {
       return 1;
+    },
+
+    /**
+     * Added 20220309
+     * get Max lineHeight for calculating lineHeight
+     * inspired by getHeightOfLine
+     * **/
+    getMaxLineHeight: function() {
+      var maxLineHeight = 0;
+      console.log('this._textLines', this._textLines)
+      for (var lineIndex = 0, len = this._textLines.length; lineIndex < len; lineIndex++) {
+        console.log('this._textLines[lineIndex]', this._textLines[lineIndex])
+        var line = this._textLines[lineIndex],
+            // char 0 is measured before the line cycle because it nneds to char
+            // emptylines
+            maxHeight = this.getHeightOfChar(lineIndex, 0);
+        if (line == undefined) continue
+        for (var j = 1, len = line.length; j < len; j++) {
+          maxHeight = Math.max(this.getHeightOfChar(lineIndex, j), maxHeight);
+        }
+        maxLineHeight = Math.max(maxHeight * this._fontSizeMult)
+        // var lineHeight = this.getHeightOfLine(i);
+        // maxLineHeight = Math.max(maxLineHeight, lineHeight)
+      }
+      return maxLineHeight
     }
+
   });
 
   /* _FROM_SVG_START_ */
