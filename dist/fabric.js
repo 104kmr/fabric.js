@@ -27342,9 +27342,9 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
      * **/
     getMaxLineHeight: function() {
       var maxLineHeight = 0;
-      console.log('this._textLines', this._textLines)
+      // console.log('this._textLines', this._textLines)
       for (var lineIndex = 0, len = this._textLines.length; lineIndex < len; lineIndex++) {
-        console.log('this._textLines[lineIndex]', this._textLines[lineIndex])
+        // console.log('this._textLines[lineIndex]', this._textLines[lineIndex])
         var line = this._textLines[lineIndex],
             // char 0 is measured before the line cycle because it nneds to char
             // emptylines
